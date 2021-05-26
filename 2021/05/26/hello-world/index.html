@@ -1,34 +1,37 @@
-extends _partial/layout.pug
+{% extends '_layout.swig' %}
+{% import '_macro/post.swig' as post_template %}
+{% import '_macro/sidebar.swig' as sidebar_template %}
 
-block content
-  - var post = page
-  - var post_type = getPropertyByType(post.type)
 
-  #post
-    article.hty-card.post-block(itemscope, itemtype='https://schema.org/Article')
-      include _partial/post/post-schema.pug
-      header.post-header
-        h1.post-title(itemprop='name headline', style=post.type ? `color: ${post_type.color}` : '')
-          if post.type
-            +icon(post_type.icon)
-          | #{post.title}
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-          if theme.post_edit.enable
-            include _partial/post/post-edit.pug
+{% block page_class %}page-post-detail{% endblock %}
 
-        include _partial/post/post-meta.pug
 
-        if post.url
-          a.hty-button.hty-button--raised(href=url_for(post.url), style=`margin-top: 1rem;background-color:${post_type.color}`)=__('post.view_link')
+{% block content %}
 
-      section.post-body(itemprop='articleBody')
-        .post-content.markdown-body(style=`--smc-primary:${theme.colors.primary};`)!=post.content
+  <div id="posts" class="posts-expand">
+    {{ post_template.render(page) }}
 
-        if theme.reward.enable && page.reward !== false
-          include _partial/post/reward.pug
+    <div class="post-spread">
+      {% if theme.jiathis %}
+        {% include '_partials/share/jiathis.swig' %}
+      {% elseif theme.baidushare %}
+        {% include '_partials/share/baidushare.swig' %}
+      {% elseif theme.add_this_id %}
+        {% include '_partials/share/add-this.swig' %}
+      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
+        {% include '_partials/share/duoshuo_share.swig' %}
+      {% endif %}
+    </div>
+  </div>
 
-        if theme.creative_commons.license && theme.creative_commons.post
-          include _partial/post/post-copyright.pug
+{% endblock %}
 
-    if post.prev || post.next
-      include _partial/post/post-nav.pug
+{% block sidebar %}
+  {{ sidebar_template.render(true) }}
+{% endblock %}
+
+{% block script_extra %}
+  {% include '_scripts/pages/post-details.swig' %}
+{% endblock %}
